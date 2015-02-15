@@ -1,8 +1,8 @@
 #Tracking Token Stripper Plus
 
 *Removes Google UTM, Facebook and all other URL garbage you set up.*
---
-    Just set up the URL Tokens you want to remove from your URL and they will be automatically removed.
+
+Just set up the URL Tokens you want to remove from your URL and they will be automatically removed.
 
 ##How it works:
 This software starts monitoring the URLs from your Google Chrome Address Field. Every URL will be clean according to the tokens you set up.
