@@ -23,7 +23,7 @@ function setState()
 function getTokens()
 {
 	chrome.storage.sync.get({
-		tokns: 'abc'
+		tokns: [ "?ocid=socialflow_facebook", "?fb_action_ids", "?bffb", "?ref=fb", "?spref=fb", "?cid=fbs", "?ref=tn_tn", "?CMP=fb", "?fb_comment_id", "?mb=fb", "?notif_t=like", "?cmpid=\"facefolha\"" ]
 	}, function(items) {
 			list = items.tokns;
 		});
