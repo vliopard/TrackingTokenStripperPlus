@@ -23,7 +23,7 @@ function setState()
 function getTokens()
 {
 	chrome.storage.sync.get({
-		tokns: [ "?ocid=socialflow_facebook", "?fb_action_ids", "?bffb", "?ref=fb", "?spref=fb", "?cid=fbs", "?ref=tn_tn", "?CMP=fb", "?fb_comment_id", "?mb=fb", "?notif_t=like", "?cmpid=\"facefolha\"" ]
+		tokns: [ "ocid=socialflow_facebook", "fb_action_ids", "bffb", "ref=fb", "spref=fb", "cid=fbs", "ref=tn_tn", "CMP=fb", "fb_comment_id", "mb=fb", "notif_t=like", "cmpid=\"facefolha\"" ]
 	}, function(items) {
 			list = items.tokns;
 		});
@@ -46,12 +46,34 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	isEnable();
 	if ( isOn == false ) return;
 	getTokens();
+	var i;
+	var reg;
+	var qIndex;
+	var pass = 0;
 	var stripped = tab.url;
     var queryStringIndex = tab.url.indexOf('?');
     if (( tab.url.indexOf('utm_') > queryStringIndex ) && ( isCk )) {
         stripped = tab.url.replace(
             /([\?\&]utm_(src|source|medium|term|campaign|content|cid|reader)=[^&#]+)/ig,
             '');
+		pass++;
+    }
+	if ( list.length != 0 )
+	{
+		stripped = tab.url;
+		for ( i=0; i<list.length; i++ )
+		{
+			reg = new RegExp("([\\?\\&]"+list[i]+"[^&#]*)","ig");
+			qIndex = stripped.indexOf(list[i]);
+			if (qIndex > 0)
+			{
+				stripped = stripped.replace(reg, "");
+			}
+		}
+		pass++;
+	}
+	if ( pass > 0 )
+	{
         if (stripped.charAt(queryStringIndex) === '&') {
             stripped = stripped.substr(0, queryStringIndex) + '?' +
                 stripped.substr(queryStringIndex + 1)
@@ -59,22 +81,5 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         if (stripped != tab.url) {
             chrome.tabs.update(tab.id, {url: stripped});
         }
-    }
-	var i;
-	var qIndex;
-	if ( list.length == 0 )
-	{
-		list = [ "?ocid=socialflow_facebook", "?fb_action_ids", "?bffb", "?ref=fb", "?spref=fb", "?cid=fbs", "?ref=tn_tn", "?CMP=fb", "?fb_comment_id", "?mb=fb", "?notif_t=like", "?cmpid=\"facefolha\"" ];
-	}
-	for ( i=0; i<list.length; i++ )
-	{
-		qIndex = stripped.indexOf(list[i]);
-		if (qIndex > 0)
-		{
-			stripped=stripped.substr(0,qIndex)
-		}
-	}	
-	if (stripped != tab.url) {
-		chrome.tabs.update(tab.id, {url: stripped});	
 	}
 });
