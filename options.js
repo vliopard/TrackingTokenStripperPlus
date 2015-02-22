@@ -158,8 +158,7 @@ function load_tokens(val) {
 			}
 		}
 		if ( found == 0 )
-		{
-			alert("op"+i+": "+word[i]);
+		{			
 			var opt = document.createElement("option");
 			opt.text = word[i];
 			ign.add(opt);
