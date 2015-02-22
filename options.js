@@ -131,8 +131,7 @@ function import_tokens_request() {
 function load_tokens(val) {
 	var word = new Array();
 	var len = document.getElementById('ignore').options.length;
-	var ign = document.getElementById('ignore');
-	var opt = document.createElement("option");
+	var ign = document.getElementById('ignore');	
 	var wordCheck
 	var test;
 	var found = 0;
@@ -160,6 +159,8 @@ function load_tokens(val) {
 		}
 		if ( found == 0 )
 		{
+			alert("op"+i+": "+word[i]);
+			var opt = document.createElement("option");
 			opt.text = word[i];
 			ign.add(opt);
 		}
