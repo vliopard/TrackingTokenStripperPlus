@@ -106,6 +106,86 @@ function remo() {
 	}
 	save_options();	
 }
+function export_tokens() {	
+	var len = document.getElementById('ignore').options.length;
+	var exptr = document.getElementById('ignore');
+	var expList = new Array();
+	var i;	
+	for ( i = 0; i < len; i++ )
+	{
+		if ( i == ( len - 1 ) )
+		{
+			expList[i] = exptr.options[i].text;
+		}
+		else
+		{
+			expList[i] = exptr.options[i].text+"{;,;}";
+		}
+	}	
+    var blob = new Blob( expList, { type: "text/plain;charset=utf-8" } );
+    return saveAs(blob, "TSTP_Options.bak");	
+}
+function import_tokens_request() {
+	document.getElementById('rfile').click();
+}
+function load_tokens(val) {
+	var word = new Array();
+	var len = document.getElementById('ignore').options.length;
+	var ign = document.getElementById('ignore');
+	var opt = document.createElement("option");
+	var wordCheck
+	var test;
+	var found = 0;
+	var i;
+	var j;
+	if (len == 1)
+	{
+		test = ign.options[0].text;
+		if ( test.trim() == "")
+		{
+			ign.remove(0);
+		}
+	}
+	word = val.split("{;,;}");
+	for ( i = 0 ; i < word.length ; i++ )
+	{
+		wordCheck = word[i].toLowerCase();
+		for ( j = 0; j < len; j++)
+		{
+			var check = ign.options[j].text.toLowerCase();
+			if ( check == wordCheck )
+			{
+				found = 1;
+			}
+		}
+		if ( found == 0 )
+		{
+			opt.text = word[i];
+			ign.add(opt);
+		}
+		found = 0;
+	}
+	save_options();
+}
+function import_tokens() {
+	var val;
+	var rfile = document.getElementById('rfile');
+    if (rfile.files.length > 0 && rfile.files[0].name.length > 0) {
+        var r = new FileReader();
+        r.onload = function (e) {
+			load_tokens(e.target.result);
+        };
+        r.onerror = function () {
+            var status = document.getElementById('msg');
+			status.textContent = "      Failed!     ";
+			setTimeout(function() {
+					status.textContent = '                ';
+					}, 850);
+        };
+        r.readAsText(rfile.files[0]);
+        rfile.value = "";
+    }
+}
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('save').addEventListener('click', save_options);
 document.getElementById('0').addEventListener('click', save_options);
@@ -113,3 +193,6 @@ document.getElementById('1').addEventListener('click', save_options);
 document.getElementById('ck').addEventListener('click', save_options);
 document.getElementById('addBtn').addEventListener('click', add);
 document.getElementById('removeBtn').addEventListener('click', remo);
+document.getElementById('exportBtn').addEventListener('click', export_tokens);
+document.getElementById('importBtn').addEventListener('click', import_tokens_request);
+document.getElementById('rfile').addEventListener('change', import_tokens);

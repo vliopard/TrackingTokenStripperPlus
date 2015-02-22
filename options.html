@@ -28,8 +28,11 @@
 								<p/><p/><select class="high" multiple="multiple" name="ignore" id="ignore" style="width:100%; height:400;">
 									<option value="token">&nbsp;</option>
 								</select>
-								<p/><b>(Site URLs conaining any of the tokens above will be stripped)</b>
-								<hr><button id="removeBtn">Remove Selected</button> - <button id="save">Save</button>
+								<button id="removeBtn">Remove Selected</button> - <button id="save">Save</button><br>
+								<b>(Site URLs conaining any of the tokens above will be stripped)</b>
+								<hr>
+								<input type="file" id="rfile" name="rfile" style="visibility:hidden;position:absolute;"/>
+								<button id="importBtn">Import</button> - <button id="exportBtn">Export</button>
 							</div>
 							<hr>
 							<table style="height:20;">
@@ -44,6 +47,7 @@
 				</tr>
 			</table>
 			<script src="options.js"></script>
+			<script src="FileSaver.js"></script>			
 		<center>
 	</body>
 </html>
