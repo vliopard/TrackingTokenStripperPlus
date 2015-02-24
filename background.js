@@ -40,7 +40,6 @@ chrome.browserAction.onClicked.addListener(function() {
 		chrome.browserAction.setIcon({path:"icon-48r.png"});
 	}
 	setState();
-	save_options();
 });
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	isEnable();
@@ -81,5 +80,10 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         if (stripped != tab.url) {
             chrome.tabs.update(tab.id, {url: stripped});
         }
+		chrome.browserAction.setIcon({path:"icon-48g.png"});
+		setTimeout(function() {
+			chrome.browserAction.setIcon({path:"icon-48.png"});
+		}, 2500);
+		
 	}
 });

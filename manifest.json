@@ -1,15 +1,15 @@
 {
 	"name": "Tracking Token Stripper Plus",
-	"version": "1.8",
+	"version": "1.8.1",
 	"manifest_version": 2,
-	"description": "Removes Google Analytics (UTM) and Facebook (OCID) tracking tokens from URL query strings.",
-	"homepage_url": "https://github.com/vliopard/chrome-utm-stripper",
+	"description": "Removes Google Analytics (UTM), Facebook and other tracking tokens you choose.",
+	"homepage_url": "https://github.com/vliopard/TrackingTokenStripperPlus",
 	"options_page": "options.html",
 	"browser_action": {
 		"default_icon": "icon-48.png"
 	},
 	"icons" :{
-		"48" : "icon-48.png",
+		"48" : "icon-48.png",		
 		"128" : "icon-128.png"
 	},
 	"background": {
