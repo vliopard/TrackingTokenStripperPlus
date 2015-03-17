@@ -25,7 +25,7 @@ You can turn TTSP on and off by clicking on its icon.
 
 - You can add or remove your own custom tokens to be stripped from the URLs you navigate into your browser.
 
-**Note** - It is currently removing everything from the URL starting from the token you define, so use it carefully.
+**Note** - It just removes the tokens you set. The other tokens not listed will be preserved into the URL.
 
 ##Warning
 

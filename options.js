@@ -123,7 +123,7 @@ function export_tokens() {
 		}
 	}	
     var blob = new Blob( expList, { type: "text/plain;charset=utf-8" } );
-    return saveAs(blob, "TSTP_Options.bak");	
+    return saveAs(blob, "TTSP_Options.bak");	
 }
 function import_tokens_request() {
 	document.getElementById('rfile').click();
