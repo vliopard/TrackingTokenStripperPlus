@@ -1,20 +1,31 @@
 {
-	"name": "Tracking Token Stripper Plus",
-	"version": "1.8.1",
-	"manifest_version": 2,
-	"description": "Removes Google Analytics (UTM), Facebook and other tracking tokens you choose.",
-	"homepage_url": "https://github.com/vliopard/TrackingTokenStripperPlus",
-	"options_page": "options.html",
-	"browser_action": {
-		"default_icon": "icon-48.png"
-	},
-	"icons" :{
-		"48" : "icon-48.png",		
-		"128" : "icon-128.png"
-	},
-	"background": {
-			"scripts": [ "background.js" ]
-	},
-	"permissions": [ "tabs", "contextMenus", "storage" ],
-	"offline_enabled": true
+    "name": "Tracking Token Stripper Plus",
+    "version": "2.0.0",
+    "manifest_version": 3,
+    "description": "Removes Google Analytics (UTM), Facebook and other tracking tokens from URLs automatically.",
+    "homepage_url": "https://github.com/vliopard/TrackingTokenStripperPlus",
+    "options_page": "options.html",
+    "action": {
+        "default_icon": {
+            "48": "icon-48.png"
+        },
+        "default_title": "Tracking Token Stripper Plus"
+    },
+    "icons": {
+        "48": "icon-48.png",
+        "128": "icon-128.png"
+    },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "permissions": [
+        "tabs",
+        "storage",
+        "declarativeNetRequest"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "offline_enabled": true
 }

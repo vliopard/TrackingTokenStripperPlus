@@ -1,53 +1,377 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Stripper Token Options</title>
-	</head>
-	<body>
-		<center>
-			<table border="1"> 
-				<tr>
-					<td>
-						<center>
-							<div id="top">
-								<p/><h1><font color="#0391d9">Stripper Token</font> Options</h1>
-							</div>
-							<div id="Mode">
-								<hr>
-								<form id="myForm1" name="myForm1">
-									<input type="radio" id="1" name="modeRadio" value="On">&nbsp;<font style="font-size:16px;">Enable</font>
-									<input type="radio" id="0" name="modeRadio" value="Off">&nbsp;<font style="font-size:16px;">Disable</font>
-									<input type="checkbox" id="ck" name="modeCheck" value="On">&nbsp;<font style="font-size:16px;">Remove Google Campaigns</font>
-								</form>
-							</div>							
-							<div id="ignorelist">
-								<hr>
-								<h3>Token List</h3>
-								<input id="add" size="30" type="text" style="width:200; height:25;">
-								<button id="addBtn">Add</button>
-								<p/><p/><select class="high" multiple="multiple" name="ignore" id="ignore" style="width:100%; height:400;">
-									<option value="token">&nbsp;</option>
-								</select>
-								<button id="removeBtn">Remove Selected</button> - <button id="save">Save</button><br>
-								<b>(Site URLs conaining any of the tokens above will be stripped)</b>
-								<hr>
-								<input type="file" id="rfile" name="rfile" style="visibility:hidden;position:absolute;"/>
-								<button id="importBtn">Import</button> - <button id="exportBtn">Export</button>
-							</div>
-							<hr>
-							<table style="height:20;">
-								<tr>
-									<td id="msg">
-										                
-									</td>
-								</tr>
-							</table>							
-						</center>
-					</td>
-				</tr>
-			</table>
-			<script src="options.js"></script>
-			<script src="FileSaver.js"></script>			
-		<center>
-	</body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Token Stripper Plus â€” Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #0e0e0f;
+            --surface:   #17171a;
+            --border:    #2a2a30;
+            --accent:    #00e5a0;
+            --accent-dim:#00e5a020;
+            --danger:    #ff4c60;
+            --danger-dim:#ff4c6018;
+            --text:      #e8e8ec;
+            --muted:     #6b6b78;
+            --mono:      'IBM Plex Mono', monospace;
+            --sans:      'IBM Plex Sans', sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-width: 560px;
+            min-height: 100vh;
+            padding: 40px 32px;
+        }
+
+        header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-area h1 {
+            font-family: var(--mono);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+            font-weight: 300;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            transition: all 0.3s;
+        }
+
+        .status-pill.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-pill.active .status-dot {
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+
+        section {
+            margin-bottom: 32px;
+        }
+
+        .section-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        /* Toggle row */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .toggle-row:hover { border-color: #3a3a44; }
+
+        .toggle-info strong {
+            font-size: 14px;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .toggle-info span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* Switch */
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .switch-track {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background 0.25s;
+        }
+
+        .switch-track::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.25s;
+        }
+
+        .switch input:checked + .switch-track {
+            background: var(--accent);
+        }
+
+        .switch input:checked + .switch-track::after {
+            transform: translateX(20px);
+        }
+
+        /* Token list */
+        .token-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .token-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .token-item:hover { border-color: #3a3a44; }
+
+        .token-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text);
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .btn-remove {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-remove:hover {
+            background: var(--danger-dim);
+            color: var(--danger);
+        }
+
+        /* Add token row */
+        .add-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-row input {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .add-row input::placeholder { color: var(--muted); }
+        .add-row input:focus { border-color: var(--accent); }
+
+        .btn-add {
+            padding: 10px 18px;
+            background: var(--accent);
+            color: #0e0e0f;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            transition: opacity 0.15s;
+        }
+
+        .btn-add:hover { opacity: 0.85; }
+
+        /* Footer */
+        footer {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .btn-reset {
+            font-size: 11px;
+            color: var(--danger);
+            background: none;
+            border: 1px solid var(--danger);
+            border-radius: 6px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+
+        .btn-reset:hover { opacity: 1; }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 10px 18px;
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--accent);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-area">
+        <h1>Tracking Token Stripper+</h1>
+        <p>URL privacy cleaner â€” settings</p>
+    </div>
+    <div class="status-pill" id="statusPill">
+        <span class="status-dot"></span>
+        <span id="statusText">INACTIVE</span>
+    </div>
+</header>
+
+<section>
+    <p class="section-label">General</p>
+
+    <div class="toggle-row">
+        <div class="toggle-info">
+            <strong>Enable extension</strong>
+            <span>Strip tokens from every URL you visit</span>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="toggleOn">
+            <span class="switch-track"></span>
+        </label>
+    </div>
+
+    <div class="toggle-row">
+        <div class="toggle-info">
+            <strong>Strip Google UTM parameters</strong>
+            <span>Removes utm_source, utm_medium, utm_campaign and others</span>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="toggleUtm">
+            <span class="switch-track"></span>
+        </label>
+    </div>
+</section>
+
+<section>
+    <p class="section-label">Custom Tokens</p>
+    <div class="token-list" id="tokenList"></div>
+    <div class="add-row">
+        <input type="text" id="newToken" placeholder="e.g. ref=twitter or custom_param">
+        <button class="btn-add" id="btnAdd">+ Add</button>
+    </div>
+</section>
+
+<footer>
+    <span>Changes saved automatically</span>
+    <button class="btn-reset" id="btnReset">Reset to defaults</button>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="options.js"></script>
+</body>
 </html>
