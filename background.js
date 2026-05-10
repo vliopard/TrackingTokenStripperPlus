@@ -39,7 +39,9 @@ function stripTokensFromString(raw, list_of_tokens, separator) {
 async function getSettings() {
     return new Promise((resolve) => {
         chrome.storage.sync.get({
-            on: false,
+            // 'on' has no default here intentionally.
+            // If storage has not resolved yet, 'on' will be undefined.
+            // Callers must treat undefined as "do not change icon state".
             stripUtm: false,
             tokens: DEFAULT_TOKENS,
             excludedDomains: [],
@@ -119,14 +121,28 @@ chrome.tabs.onUpdated.addListener(async (tab_id, change_info, tab) => {
     if (!tab.url.startsWith('http')) return;
 
     const settings = await getSettings();
-    if (!settings.on) return;
+
+    // If 'on' is undefined, storage has not resolved — do nothing.
+    if (settings.on !== true) return;
 
     const cleaned = stripUrl(tab.url, settings);
 
     if (cleaned !== tab.url) {
         await chrome.tabs.update(tab_id, { url: cleaned });
         await setIcon('cleaned');
-        setTimeout(() => setIcon('on'), 2500);
+        // Use chrome.alarms instead of setTimeout so the callback
+        // survives service worker suspension (Bug 1 fix).
+        await chrome.alarms.create('restore-icon', { delayInMinutes: 1 / 24 }); // ~2.5 seconds
+    }
+});
+
+// Fires when the restore-icon alarm expires, returning icon to blue.
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name !== 'restore-icon') return;
+    const settings = await getSettings();
+    // Only restore to blue if extension is still on.
+    if (settings.on === true) {
+        await setIcon('on');
     }
 });
 
@@ -137,12 +153,17 @@ chrome.action.onClicked.addListener(async () => {
     await setIcon(next ? 'on' : 'off');
 });
 
-chrome.runtime.onStartup.addListener(async () => {
+// Shared handler for both onStartup and onInstalled.
+// Only sets the icon when 'on' is definitively true or false.
+// If 'on' is undefined (storage not yet available), the icon is
+// not changed — avoiding the red-icon bug caused by the default
+// value resolving before sync storage is ready (Bug 2 fix).
+async function syncIconWithStorage() {
     const { on } = await getSettings();
-    await setIcon(on ? 'on' : 'off');
-});
+    if (on === true)  await setIcon('on');
+    if (on === false) await setIcon('off');
+    // on === undefined: storage not ready yet, do not touch the icon.
+}
 
-chrome.runtime.onInstalled.addListener(async () => {
-    const { on } = await getSettings();
-    await setIcon(on ? 'on' : 'off');
-});
+chrome.runtime.onStartup.addListener(syncIconWithStorage);
+chrome.runtime.onInstalled.addListener(syncIconWithStorage);
