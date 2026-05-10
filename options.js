@@ -431,3 +431,33 @@ chrome.storage.sync.get({
 
 // ── Tab init ──────────────────────────────────────────────────────────────────
 initTabs();
+
+// ── Live sync from background ─────────────────────────────────────────────────
+// Fires whenever chrome.storage.sync changes — including when the toolbar
+// button toggles 'on' from background.js while this options page is open.
+// Updates the status pill and the toggle checkbox without requiring F5.
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'sync') return;
+
+    if (changes.on !== undefined) {
+        const new_value = changes.on.newValue;
+        toggle_on.checked = new_value;
+        updateStatusPill(new_value);
+    }
+
+    if (changes.stripUtm !== undefined) {
+        toggle_utm.checked = changes.stripUtm.newValue;
+    }
+
+    if (changes.tokens !== undefined) {
+        list_of_global_tokens = changes.tokens.newValue;
+        renderGlobalTokens();
+        updateSummary();
+    }
+
+    if (changes.excludedDomains !== undefined) {
+        list_of_excluded_domains = changes.excludedDomains.newValue;
+        renderDomainList();
+        updateSummary();
+    }
+});
