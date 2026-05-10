@@ -36,7 +36,7 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
             padding-bottom: 24px;
             border-bottom: 1px solid var(--border);
         }
@@ -92,6 +92,40 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50%       { opacity: 0.3; }
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn-toolbar {
+            font-size: 11px;
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-toolbar:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .btn-toolbar.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-dim);
         }
 
         section {
@@ -263,37 +297,6 @@
 
         .btn-add:hover { opacity: 0.85; }
 
-        /* Footer */
-        footer {
-            margin-top: 48px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        footer span {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .btn-reset {
-            font-size: 11px;
-            color: var(--danger);
-            background: none;
-            border: 1px solid var(--danger);
-            border-radius: 6px;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-family: var(--mono);
-            letter-spacing: 0.06em;
-            opacity: 0.7;
-            transition: opacity 0.15s;
-        }
-
-        .btn-reset:hover { opacity: 1; }
-
         .toast {
             position: fixed;
             bottom: 24px;
@@ -330,6 +333,13 @@
     </div>
 </header>
 
+<div class="toolbar">
+    <button class="btn-toolbar danger" id="btnReset">↺ Reset to defaults</button>
+    <button class="btn-toolbar" id="btnImport">↑ Import .txt</button>
+    <button class="btn-toolbar" id="btnExport">↓ Export .txt</button>
+    <input type="file" id="fileInput" accept=".txt" style="display:none">
+</div>
+
 <section>
     <p class="section-label">General</p>
 
@@ -364,11 +374,6 @@
     </div>
     <div class="token-list" id="tokenList"></div>
 </section>
-
-<footer>
-    <span>Changes saved automatically</span>
-    <button class="btn-reset" id="btnReset">Reset to defaults</button>
-</footer>
 
 <div class="toast" id="toast"></div>
 

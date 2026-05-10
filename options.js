@@ -22,6 +22,9 @@ const tokenList  = document.getElementById('tokenList');
 const newToken   = document.getElementById('newToken');
 const btnAdd     = document.getElementById('btnAdd');
 const btnReset   = document.getElementById('btnReset');
+const btnImport  = document.getElementById('btnImport');
+const btnExport  = document.getElementById('btnExport');
+const fileInput  = document.getElementById('fileInput');
 const statusPill = document.getElementById('statusPill');
 const statusText = document.getElementById('statusText');
 const toast      = document.getElementById('toast');
@@ -117,4 +120,71 @@ btnReset.addEventListener('click', () => {
     if (!confirm('Reset all tokens to default list?')) return;
     renderTokens(DEFAULT_TOKENS);
     save({ tokens: DEFAULT_TOKENS });
+});
+
+// ── Export tokens as .txt ─────────────────────────────────────────────────────
+// Each token is written on its own line.
+// Empty lines and lines starting with # are ignored on import.
+btnExport.addEventListener('click', () => {
+    chrome.storage.sync.get({ tokens: DEFAULT_TOKENS }, ({ tokens }) => {
+        const file_content = tokens.join('\n');
+        const blob_to_save = new Blob([file_content], { type: 'text/plain' });
+        const object_url   = URL.createObjectURL(blob_to_save);
+
+        const link_element = document.createElement('a');
+        link_element.href     = object_url;
+        link_element.download = 'tokens.txt';
+        link_element.click();
+
+        URL.revokeObjectURL(object_url);
+        showToast('Exported tokens.txt ✓');
+    });
+});
+
+// ── Import tokens from .txt ───────────────────────────────────────────────────
+// Reads the file, splits by newline, trims whitespace from each line,
+// removes empty lines and lines starting with #, then merges with
+// existing tokens (duplicates are skipped).
+btnImport.addEventListener('click', () => {
+    fileInput.value = '';  // reset so the same file can be re-selected
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', () => {
+    const selected_file = fileInput.files[0];
+    if (!selected_file) return;
+
+    const file_reader = new FileReader();
+
+    file_reader.onload = (event) => {
+        const raw_text          = event.target.result;
+        const list_of_new_tokens = raw_text
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0 && !line.startsWith('#'));
+
+        if (list_of_new_tokens.length === 0) {
+            showToast('No valid tokens found in file');
+            return;
+        }
+
+        chrome.storage.sync.get({ tokens: DEFAULT_TOKENS }, ({ tokens }) => {
+            const list_of_existing_tokens = tokens;
+            const list_of_merged_tokens   = [...list_of_existing_tokens];
+            let count_of_added_tokens     = 0;
+
+            for (const token_value of list_of_new_tokens) {
+                if (!list_of_merged_tokens.includes(token_value)) {
+                    list_of_merged_tokens.push(token_value);
+                    count_of_added_tokens++;
+                }
+            }
+
+            renderTokens(list_of_merged_tokens);
+            save({ tokens: list_of_merged_tokens });
+            showToast(`Imported ${count_of_added_tokens} new token(s) ✓`);
+        });
+    };
+
+    file_reader.readAsText(selected_file);
 });
