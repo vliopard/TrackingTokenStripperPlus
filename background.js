@@ -12,29 +12,25 @@ const DEFAULT_TOKENS = [
     'fb_comment_id',
     'mb=fb',
     'notif_t=like',
-    'polycard_client',  // MercadoLibre recommendation tracker
+    'polycard_client',
 ];
 
 const UTM_PATTERN = /([\?&]utm_(src|source|medium|term|campaign|content|cid|reader)=[^&#]*)/ig;
 
-// Strips matching tokens from a raw query/fragment string like
-// "?foo=1&bar=2" or "#polycard_client=xyz&other=1"
-function stripTokensFromString(raw, tokens, separator) {
+function stripTokensFromString(raw, list_of_tokens, separator) {
     let result = raw;
-    for (const token of tokens) {
+    for (const token of list_of_tokens) {
         const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Match token at start (after separator) or after & separator
         const reg = new RegExp(
             `(^[${separator}]${escaped}[^&#]*|[&]${escaped}[^&#]*)`,
             'ig'
         );
         result = result.replace(reg, '');
     }
-    // Restore leading separator if it was swallowed
     if (raw.length > 0 && result.length > 0) {
-        const leadChar = raw[0];
-        if (result[0] !== leadChar && (leadChar === '?' || leadChar === '#')) {
-            result = leadChar + result.replace(/^[&]/, '');
+        const lead_char = raw[0];
+        if (result[0] !== lead_char && (lead_char === '?' || lead_char === '#')) {
+            result = lead_char + result.replace(/^[&]/, '');
         }
     }
     return result;
@@ -46,6 +42,7 @@ async function getSettings() {
             on: false,
             stripUtm: false,
             tokens: DEFAULT_TOKENS,
+            excludedDomains: [],
         }, resolve);
     });
 }
@@ -59,41 +56,66 @@ async function setIcon(state) {
     await chrome.action.setIcon({ path: icons[state] });
 }
 
-function stripUrl(rawUrl, { stripUtm, tokens }) {
+// Returns true if hostname matches domain exactly or is a subdomain of domain.
+// Example: domainMatches('shop.example.com', 'example.com') => true
+//          domainMatches('example.com', 'example.com')      => true
+//          domainMatches('othersite.com', 'example.com')    => false
+function domainMatches(hostname, domain) {
+    return hostname === domain || hostname.endsWith('.' + domain);
+}
+
+// Finds the first excluded domain entry whose domain matches the given hostname.
+// Returns the entry object { domain, tokens } or null if no match.
+function findExcludedEntry(hostname, list_of_excluded_domains) {
+    for (const entry of list_of_excluded_domains) {
+        if (domainMatches(hostname, entry.domain)) {
+            return entry;
+        }
+    }
+    return null;
+}
+
+function stripUrl(raw_url, { stripUtm, tokens, excludedDomains }) {
     let parsed;
     try {
-        parsed = new URL(rawUrl);
+        parsed = new URL(raw_url);
     } catch {
-        return rawUrl; // Not a valid URL — leave as-is
+        return raw_url;
     }
 
-    // ── Query string (?foo=1&bar=2) ───────────────────────────────────────────
-    let search = parsed.search; // e.g. "?foo=1&bar=2"
+    const hostname = parsed.hostname;
+    const excluded_entry = findExcludedEntry(hostname, excludedDomains);
 
-    if (stripUtm && search) {
+    // Decide which token list to apply.
+    // If the domain is excluded: use only its own tokens (may be empty).
+    // If not excluded: use global tokens.
+    const list_of_tokens_to_apply = excluded_entry !== null
+        ? excluded_entry.tokens
+        : tokens;
+
+    let search = parsed.search;
+
+    // UTM stripping only applies when the domain is NOT excluded.
+    if (excluded_entry === null && stripUtm && search) {
         search = search.replace(UTM_PATTERN, '');
     }
 
     if (search) {
-        search = stripTokensFromString(search, tokens, '?');
-        // Normalize: if all params were removed, clear the '?'
+        search = stripTokensFromString(search, list_of_tokens_to_apply, '?');
         parsed.search = search === '?' ? '' : search;
     }
 
-    // ── Hash fragment (#key=val&other=val) ────────────────────────────────────
-    let hash = parsed.hash; // e.g. "#polycard_client=recommendations"
-
+    let hash = parsed.hash;
     if (hash) {
-        hash = stripTokensFromString(hash, tokens, '#');
+        hash = stripTokensFromString(hash, list_of_tokens_to_apply, '#');
         parsed.hash = hash === '#' ? '' : hash;
     }
 
     return parsed.toString();
 }
 
-// Listen for tab updates and clean URLs
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (changeInfo.status !== 'loading' || !tab.url) return;
+chrome.tabs.onUpdated.addListener(async (tab_id, change_info, tab) => {
+    if (change_info.status !== 'loading' || !tab.url) return;
     if (!tab.url.startsWith('http')) return;
 
     const settings = await getSettings();
@@ -102,13 +124,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     const cleaned = stripUrl(tab.url, settings);
 
     if (cleaned !== tab.url) {
-        await chrome.tabs.update(tabId, { url: cleaned });
+        await chrome.tabs.update(tab_id, { url: cleaned });
         await setIcon('cleaned');
         setTimeout(() => setIcon('on'), 2500);
     }
 });
 
-// Toggle on/off via action button click
 chrome.action.onClicked.addListener(async () => {
     const { on } = await getSettings();
     const next = !on;
@@ -116,7 +137,6 @@ chrome.action.onClicked.addListener(async () => {
     await setIcon(next ? 'on' : 'off');
 });
 
-// Sync icon state on startup
 chrome.runtime.onStartup.addListener(async () => {
     const { on } = await getSettings();
     await setIcon(on ? 'on' : 'off');

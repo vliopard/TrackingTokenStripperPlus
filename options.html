@@ -8,17 +8,25 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg:        #0e0e0f;
-            --surface:   #17171a;
-            --border:    #2a2a30;
-            --accent:    #00e5a0;
-            --accent-dim:#00e5a020;
-            --danger:    #ff4c60;
-            --danger-dim:#ff4c6018;
-            --text:      #e8e8ec;
-            --muted:     #6b6b78;
-            --mono:      'IBM Plex Mono', monospace;
-            --sans:      'IBM Plex Sans', sans-serif;
+            --bg:          #0e0e0f;
+            --surface:     #17171a;
+            --surface-2:   #1f1f23;
+            --border:      #2a2a30;
+            --border-2:    #3a3a44;
+            --accent:      #00e5a0;
+            --accent-dim:  #00e5a018;
+            --danger:      #ff4c60;
+            --danger-dim:  #ff4c6018;
+            --warn-bg:     #2a200e;
+            --warn-border: #7a5010;
+            --info-bg:     #0d1f35;
+            --info-color:  #5aadff;
+            --text:        #e8e8ec;
+            --muted:       #6b6b78;
+            --mono:        'IBM Plex Mono', monospace;
+            --sans:        'IBM Plex Sans', sans-serif;
+            --radius:      8px;
+            --radius-lg:   12px;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,23 +35,24 @@
             font-family: var(--sans);
             background: var(--bg);
             color: var(--text);
-            min-width: 560px;
+            min-width: 580px;
             min-height: 100vh;
-            padding: 40px 32px;
+            padding: 32px 28px 48px;
         }
 
+        /* ── Header ──────────────────────────────────────────────────────────── */
         header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 24px;
-            padding-bottom: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
         }
 
         .logo-area h1 {
             font-family: var(--mono);
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             letter-spacing: 0.08em;
             color: var(--accent);
@@ -53,23 +62,23 @@
         .logo-area p {
             font-size: 12px;
             color: var(--muted);
-            margin-top: 4px;
-            font-weight: 300;
+            margin-top: 3px;
         }
 
         .status-pill {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
             font-family: var(--mono);
             font-size: 11px;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            padding: 6px 14px;
+            padding: 5px 13px;
             border-radius: 100px;
             border: 1px solid var(--border);
             color: var(--muted);
             transition: all 0.3s;
+            user-select: none;
         }
 
         .status-pill.active {
@@ -83,6 +92,7 @@
             height: 6px;
             border-radius: 50%;
             background: currentColor;
+            flex-shrink: 0;
         }
 
         .status-pill.active .status-dot {
@@ -94,21 +104,31 @@
             50%       { opacity: 0.3; }
         }
 
-        /* Toolbar */
+        /* ── Global toolbar ──────────────────────────────────────────────────── */
         .toolbar {
             display: flex;
             gap: 8px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .toolbar-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-right: 4px;
         }
 
         .btn-toolbar {
             font-size: 11px;
             font-family: var(--mono);
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             padding: 6px 14px;
-            border-radius: 6px;
+            border-radius: var(--radius);
             cursor: pointer;
             border: 1px solid var(--border);
             background: var(--surface);
@@ -128,36 +148,70 @@
             background: var(--danger-dim);
         }
 
-        section {
-            margin-bottom: 32px;
+        /* ── Tabs ────────────────────────────────────────────────────────────── */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+            gap: 0;
         }
 
+        .tab {
+            padding: 10px 20px;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: var(--muted);
+            transition: color 0.15s, border-color 0.15s;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .tab:hover:not(.active) { color: var(--text); }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* ── Panels ──────────────────────────────────────────────────────────── */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* ── Section label ───────────────────────────────────────────────────── */
         .section-label {
             font-family: var(--mono);
             font-size: 10px;
             letter-spacing: 0.14em;
             text-transform: uppercase;
             color: var(--muted);
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
-        /* Toggle row */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        /* ── Toggle rows ─────────────────────────────────────────────────────── */
         .toggle-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
+            padding: 14px 18px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: var(--radius-lg);
             margin-bottom: 10px;
             transition: border-color 0.2s;
         }
 
-        .toggle-row:hover { border-color: #3a3a44; }
+        .toggle-row:hover { border-color: var(--border-2); }
 
         .toggle-info strong {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             display: block;
             margin-bottom: 2px;
@@ -168,11 +222,10 @@
             color: var(--muted);
         }
 
-        /* Switch */
         .switch {
             position: relative;
-            width: 44px;
-            height: 24px;
+            width: 40px;
+            height: 22px;
             flex-shrink: 0;
         }
 
@@ -181,7 +234,7 @@
         .switch-track {
             position: absolute;
             inset: 0;
-            background: var(--border);
+            background: var(--border-2);
             border-radius: 100px;
             cursor: pointer;
             transition: background 0.25s;
@@ -192,84 +245,57 @@
             position: absolute;
             left: 3px;
             top: 3px;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             background: #fff;
             border-radius: 50%;
             transition: transform 0.25s;
         }
 
-        .switch input:checked + .switch-track {
-            background: var(--accent);
-        }
+        .switch input:checked + .switch-track { background: var(--accent); }
+        .switch input:checked + .switch-track::after { transform: translateX(18px); }
 
-        .switch input:checked + .switch-track::after {
-            transform: translateX(20px);
-        }
-
-        /* Token list */
-        .token-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .token-item {
-            display: flex;
-            align-items: center;
+        /* ── Summary cards ───────────────────────────────────────────────────── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            padding: 10px 14px;
+        }
+
+        .summary-card {
+            padding: 14px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            transition: border-color 0.2s;
+            border-radius: var(--radius-lg);
+            text-align: center;
         }
 
-        .token-item:hover { border-color: #3a3a44; }
-
-        .token-name {
+        .summary-card .count {
+            font-size: 26px;
+            font-weight: 500;
             font-family: var(--mono);
-            font-size: 12px;
-            color: var(--text);
-            flex: 1;
-            word-break: break-all;
+            color: var(--accent);
         }
 
-        .btn-remove {
-            width: 26px;
-            height: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            background: transparent;
+        .summary-card .label {
+            font-size: 11px;
             color: var(--muted);
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 16px;
-            line-height: 1;
-            flex-shrink: 0;
-            transition: background 0.15s, color 0.15s;
+            margin-top: 4px;
         }
 
-        .btn-remove:hover {
-            background: var(--danger-dim);
-            color: var(--danger);
-        }
-
-        /* Add token row */
+        /* ── Add row ─────────────────────────────────────────────────────────── */
         .add-row {
             display: flex;
             gap: 8px;
+            margin-bottom: 16px;
         }
 
-        .add-row input {
+        .text-input {
             flex: 1;
-            padding: 10px 14px;
+            padding: 9px 13px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius);
             color: var(--text);
             font-family: var(--mono);
             font-size: 12px;
@@ -277,26 +303,180 @@
             transition: border-color 0.2s;
         }
 
-        .add-row input::placeholder { color: var(--muted); }
-        .add-row input:focus { border-color: var(--accent); }
+        .text-input::placeholder { color: var(--muted); }
+        .text-input:focus { border-color: var(--accent); }
 
-        .btn-add {
-            padding: 10px 18px;
+        .btn-primary {
+            padding: 9px 18px;
             background: var(--accent);
             color: #0e0e0f;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius);
             font-family: var(--mono);
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             white-space: nowrap;
             transition: opacity 0.15s;
         }
 
-        .btn-add:hover { opacity: 0.85; }
+        .btn-primary:hover { opacity: 0.85; }
 
+        .btn-primary.small {
+            padding: 7px 13px;
+            font-size: 11px;
+        }
+
+        /* ── Token chips ─────────────────────────────────────────────────────── */
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .token-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px 5px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+
+        .chip-name { color: var(--text); }
+
+        .chip-remove {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+            transition: color 0.15s;
+            display: flex;
+            align-items: center;
+        }
+
+        .chip-remove:hover { color: var(--danger); }
+
+        /* ── Domain cards ────────────────────────────────────────────────────── */
+        .domain-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .domain-card:hover { border-color: var(--border-2); }
+
+        .domain-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .domain-name {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text);
+            flex: 1;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 9px;
+            border-radius: 100px;
+            background: var(--info-bg);
+            color: var(--info-color);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge.none {
+            background: var(--surface-2);
+            color: var(--muted);
+        }
+
+        .chevron {
+            color: var(--muted);
+            font-size: 16px;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chevron.open { transform: rotate(180deg); }
+
+        .domain-body {
+            border-top: 1px solid var(--border);
+            padding: 16px;
+            background: var(--surface-2);
+        }
+
+        .domain-body-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .domain-add-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .scope-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 14px;
+            padding: 10px 12px;
+            background: var(--warn-bg);
+            border-left: 2px solid var(--warn-border);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            line-height: 1.5;
+        }
+
+        .scope-note strong { color: var(--text); }
+
+        .btn-danger-link {
+            display: block;
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            font-family: var(--sans);
+            opacity: 0.8;
+            transition: opacity 0.15s;
+        }
+
+        .btn-danger-link:hover { opacity: 1; }
+
+        /* ── Empty state ─────────────────────────────────────────────────────── */
+        .empty-msg {
+            font-size: 13px;
+            color: var(--muted);
+            padding: 16px 0;
+        }
+
+        .empty-msg.small {
+            font-size: 12px;
+            padding: 6px 0 10px;
+        }
+
+        /* ── Toast ───────────────────────────────────────────────────────────── */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -304,7 +484,7 @@
             padding: 10px 18px;
             background: var(--surface);
             border: 1px solid var(--accent);
-            border-radius: 8px;
+            border-radius: var(--radius);
             font-family: var(--mono);
             font-size: 12px;
             color: var(--accent);
@@ -312,6 +492,7 @@
             transform: translateY(8px);
             transition: opacity 0.3s, transform 0.3s;
             pointer-events: none;
+            z-index: 999;
         }
 
         .toast.show {
@@ -322,26 +503,37 @@
 </head>
 <body>
 
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
 <header>
     <div class="logo-area">
         <h1>Tracking Token Stripper+</h1>
         <p>URL privacy cleaner — settings</p>
     </div>
-    <div class="status-pill" id="statusPill">
+    <div class="status-pill" id="status-pill">
         <span class="status-dot"></span>
-        <span id="statusText">INACTIVE</span>
+        <span id="status-text">INACTIVE</span>
     </div>
 </header>
 
+<!-- ── Global toolbar (applies to entire configuration) ───────────────────── -->
 <div class="toolbar">
-    <button class="btn-toolbar danger" id="btnReset">↺ Reset to defaults</button>
-    <button class="btn-toolbar" id="btnImport">↑ Import .txt</button>
-    <button class="btn-toolbar" id="btnExport">↓ Export .txt</button>
-    <input type="file" id="fileInput" accept=".txt" style="display:none">
+    <span class="toolbar-label">Config:</span>
+    <button class="btn-toolbar danger" id="btn-reset">↺ Reset</button>
+    <button class="btn-toolbar" id="btn-import">↑ Import</button>
+    <button class="btn-toolbar" id="btn-export">↓ Export</button>
+    <input type="file" id="file-input" accept=".json" style="display:none">
 </div>
 
-<section>
-    <p class="section-label">General</p>
+<!-- ── Tabs ────────────────────────────────────────────────────────────────── -->
+<div class="tabs">
+    <div class="tab active" data-tab="general">General</div>
+    <div class="tab" data-tab="global">Global tokens</div>
+    <div class="tab" data-tab="domains">Excluded domains</div>
+</div>
+
+<!-- ── Panel: General ──────────────────────────────────────────────────────── -->
+<div class="panel active" id="panel-general">
+    <div class="section-label">Extension settings</div>
 
     <div class="toggle-row">
         <div class="toggle-info">
@@ -349,7 +541,7 @@
             <span>Strip tokens from every URL you visit</span>
         </div>
         <label class="switch">
-            <input type="checkbox" id="toggleOn">
+            <input type="checkbox" id="toggle-on">
             <span class="switch-track"></span>
         </label>
     </div>
@@ -357,23 +549,56 @@
     <div class="toggle-row">
         <div class="toggle-info">
             <strong>Strip Google UTM parameters</strong>
-            <span>Removes utm_source, utm_medium, utm_campaign and others</span>
+            <span>Removes utm_source, utm_medium, utm_campaign, and others</span>
         </div>
         <label class="switch">
-            <input type="checkbox" id="toggleUtm">
+            <input type="checkbox" id="toggle-utm">
             <span class="switch-track"></span>
         </label>
     </div>
-</section>
 
-<section>
-    <p class="section-label">Custom Tokens</p>
-    <div class="add-row">
-        <input type="text" id="newToken" placeholder="e.g. ref=twitter or custom_param">
-        <button class="btn-add" id="btnAdd">+ Add</button>
+    <div class="divider"></div>
+    <div class="section-label">Summary</div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="count" id="summary-global">0</div>
+            <div class="label">global tokens</div>
+        </div>
+        <div class="summary-card">
+            <div class="count" id="summary-domains">0</div>
+            <div class="label">excluded domains</div>
+        </div>
+        <div class="summary-card">
+            <div class="count" id="summary-dtokens">0</div>
+            <div class="label">domain-specific tokens</div>
+        </div>
     </div>
-    <div class="token-list" id="tokenList"></div>
-</section>
+</div>
+
+<!-- ── Panel: Global tokens ────────────────────────────────────────────────── -->
+<div class="panel" id="panel-global">
+    <div class="section-label">Tokens stripped on all non-excluded domains</div>
+
+    <div class="add-row">
+        <input type="text" class="text-input" id="new-token-input" placeholder="e.g. ref=twitter">
+        <button class="btn-primary" id="btn-add-token">+ Add token</button>
+    </div>
+
+    <div class="chip-container" id="token-list"></div>
+</div>
+
+<!-- ── Panel: Excluded domains ─────────────────────────────────────────────── -->
+<div class="panel" id="panel-domains">
+    <div class="section-label">Domains excluded from global token stripping</div>
+
+    <div class="add-row">
+        <input type="text" class="text-input" id="new-domain-input" placeholder="e.g. example.com">
+        <button class="btn-primary" id="btn-add-domain">+ Add domain</button>
+    </div>
+
+    <div id="domain-list"></div>
+</div>
 
 <div class="toast" id="toast"></div>
 
