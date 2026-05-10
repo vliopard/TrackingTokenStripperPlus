@@ -322,7 +322,12 @@ new_domain_input.addEventListener('keydown', (e) => {
 toggle_on.addEventListener('change', () => {
     const is_on = toggle_on.checked;
     updateStatusPill(is_on);
-    chrome.storage.sync.set({ on: is_on }, () => showToast('Saved ✓'));
+    chrome.storage.sync.set({ on: is_on }, () => {
+        // Tell the background service worker to update the toolbar icon
+        // immediately. Without this, the icon only updates on next startup.
+        chrome.runtime.sendMessage({ type: 'sync-icon' });
+        showToast('Saved ✓');
+    });
 });
 
 toggle_utm.addEventListener('change', () => {

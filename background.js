@@ -159,17 +159,25 @@ chrome.action.onClicked.addListener(async () => {
     await setIcon(next ? 'on' : 'off');
 });
 
-// Shared handler for both onStartup and onInstalled.
-// Only sets the icon when 'on' is definitively true or false.
-// If 'on' is undefined (storage not yet available), the icon is
-// not changed — avoiding the red-icon bug caused by the default
-// value resolving before sync storage is ready (Bug 2 fix).
+// Reads 'on' from storage with an explicit default of false and sets the
+// toolbar icon to match. Used by onStartup, onInstalled, and the message
+// listener so the icon always reflects the true stored state.
 async function syncIconWithStorage() {
-    const { on } = await getSettings();
+    const { on } = await new Promise((resolve) => {
+        chrome.storage.sync.get({ on: false }, resolve);
+    });
     if (on === true)  await setIcon('on');
     if (on === false) await setIcon('off');
-    // on === undefined: storage not ready yet, do not touch the icon.
 }
 
 chrome.runtime.onStartup.addListener(syncIconWithStorage);
 chrome.runtime.onInstalled.addListener(syncIconWithStorage);
+
+// ── Message listener ──────────────────────────────────────────────────────────
+// Receives 'sync-icon' from the options page when the user toggles on/off there,
+// so the toolbar icon updates immediately without requiring a service worker restart.
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'sync-icon') {
+        syncIconWithStorage();
+    }
+});
