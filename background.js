@@ -147,8 +147,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 });
 
 chrome.action.onClicked.addListener(async () => {
-    const { on } = await getSettings();
-    const next = !on;
+    // Read 'on' with an explicit default of false here only.
+    // getSettings() has no default for 'on' to avoid the Bug 2 red-icon issue,
+    // but onClicked is a deliberate user action — safe to default to false,
+    // meaning: if never set, first click turns the extension on.
+    const result = await new Promise((resolve) => {
+        chrome.storage.sync.get({ on: false }, resolve);
+    });
+    const next = !result.on;
     await chrome.storage.sync.set({ on: next });
     await setIcon(next ? 'on' : 'off');
 });
