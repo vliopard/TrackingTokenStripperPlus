@@ -120,10 +120,18 @@ chrome.tabs.onUpdated.addListener(async (tab_id, change_info, tab) => {
     if (change_info.status !== 'loading' || !tab.url) return;
     if (!tab.url.startsWith('http')) return;
 
-    const settings = await getSettings();
+    // Read 'on' with explicit default false, same pattern as onClicked and
+    // syncIconWithStorage. getSettings() has no default for 'on', so using it
+    // here would return undefined on a cold service worker start and skip
+    // filtering entirely — which is the bug that broke token stripping.
+    const { on } = await new Promise((resolve) => {
+        chrome.storage.sync.get({ on: false }, resolve);
+    });
 
-    // If 'on' is undefined, storage has not resolved — do nothing.
-    if (settings.on !== true) return;
+    if (on !== true) return;
+
+    // Read remaining settings via getSettings() — these all have safe defaults.
+    const settings = await getSettings();
 
     const cleaned = stripUrl(tab.url, settings);
 
@@ -139,9 +147,10 @@ chrome.tabs.onUpdated.addListener(async (tab_id, change_info, tab) => {
 // Fires when the restore-icon alarm expires, returning icon to blue.
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name !== 'restore-icon') return;
-    const settings = await getSettings();
-    // Only restore to blue if extension is still on.
-    if (settings.on === true) {
+    const { on } = await new Promise((resolve) => {
+        chrome.storage.sync.get({ on: false }, resolve);
+    });
+    if (on === true) {
         await setIcon('on');
     }
 });
