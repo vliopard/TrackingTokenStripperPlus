@@ -21,8 +21,15 @@ function stripTokensFromString(raw, list_of_tokens, separator) {
     let result = raw;
     for (const token of list_of_tokens) {
         const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // If the token contains '=' (e.g. "ref=fb"), it already pins the match
+        // to a specific name=value pair, so no boundary is needed after the name.
+        // If the token has no '=' (e.g. "lis"), we must add (?=[=&#]|$) after
+        // the escaped token so it only matches the exact parameter name and does
+        // not match parameters whose name merely starts with the token string
+        // (e.g. "lis" must not match "listId=1489571745").
+        const boundary = token.includes('=') ? '' : '(?=[=&#]|$)';
         const reg = new RegExp(
-            `(^[${separator}]${escaped}[^&#]*|[&]${escaped}[^&#]*)`,
+            `(^[${separator}]${escaped}${boundary}[^&#]*|[&]${escaped}${boundary}[^&#]*)`,
             'ig'
         );
         result = result.replace(reg, '');
