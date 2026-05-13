@@ -109,10 +109,17 @@ function stripUrl(raw_url, { stripUtm, tokens, excludedDomains }) {
         search = search.replace(UTM_PATTERN, '');
     }
 
-    if (search) {
-        search = stripTokensFromString(search, list_of_tokens_to_apply, '?');
-        parsed.search = search === '?' ? '' : search;
+    // Always reassign parsed.search after any stripping, even if search became
+    // an empty string. The previous guard `if (search)` skipped the assignment
+    // when UTM stripping reduced search to '' — leaving the original UTM params
+    // in the URL unchanged.
+    // Normalize: restore leading ? if UTM regex consumed it along with the first
+    // parameter, leaving a bare & at the start (e.g. "&listId=123" → "?listId=123").
+    if (search.startsWith('&')) {
+        search = '?' + search.slice(1);
     }
+    search = stripTokensFromString(search, list_of_tokens_to_apply, '?');
+    parsed.search = (search === '?' || search === '') ? '' : search;
 
     let hash = parsed.hash;
     if (hash) {
